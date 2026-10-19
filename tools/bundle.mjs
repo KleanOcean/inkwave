@@ -41,7 +41,7 @@ const threePaths = {
 };
 
 const result = await build({
-  entryPoints: [path.join(ROOT, 'src/main.js')],
+  entryPoints: [path.join(ROOT, 'src/entry.js')],
   outfile: path.join(dist, BUNDLE),
   bundle: true,
   format: 'esm',
@@ -74,14 +74,14 @@ if (map) fs.writeFileSync(mapFile, map);
 // three ships bundled inside the single file now, so the vendored copies and the import map are unused.
 fs.rmSync(path.join(dist, 'vendor'), { recursive: true, force: true });
 
-// index.html still points at the unbundled ./src/main.js and carries an import map for a vendor/ tree that no longer
+// index.html still points at the unbundled ./src/entry.js and carries an import map for a vendor/ tree that no longer
 // exists. Repoint it at the bundle and drop the import map — leaving it would be a stale reference to deleted files
 // (inert today, because the bundle resolves everything statically, but a trap for whoever reads it next).
 const indexPath = path.join(dist, 'index.html');
 let html = fs.readFileSync(indexPath, 'utf8');
 html = html.replace(/<script type="importmap">[\s\S]*?<\/script>\s*/i, '');
 html = html.replace(
-  /(<script type="module" src=")\.\/src\/main\.js(")/i,
+  /(<script type="module" src=")\.\/src\/entry\.js(")/i,
   (_m, a, b) => a + './' + BUNDLE.split(path.sep).join('/') + b,
 );
 fs.writeFileSync(indexPath, html);
